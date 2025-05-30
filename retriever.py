@@ -9,7 +9,7 @@ import pickle
 class get_similar_books:
     def __init__(
         self,
-        csv_path="data/haodoo_books.csv",
+        csv_path=os.path.join(os.path.dirname(__file__), "haodoo_books.csv"),
         cache_dir="cache",
         embedding_model_name="intfloat/multilingual-e5-large"
     ):
