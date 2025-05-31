@@ -6,6 +6,7 @@ import pandas as pd
 # 請確保你有設置 OpenAI API 金鑰
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
+# 使用 GPT 生成內容摘要大綱
 def generate_outline(content):
     if not content or len(content) < 50:
         return ["內容過少，無法產生重點摘要。"]
@@ -20,6 +21,7 @@ def generate_outline(content):
     except Exception as e:
         return [f"⚠️ 無法產生摘要：{e}"]
 
+# Streamlit 設定
 st.set_page_config(page_title="Book一試", page_icon="📘", layout="centered")
 
 st.markdown("""
@@ -29,8 +31,10 @@ st.markdown("""
 
 st.markdown("---")
 
+# 使用者輸入
 user_input = st.text_input("請輸入你喜歡的主題或關鍵字：", placeholder="例如：哲學、成長、愛情、科幻…")
 
+# 推薦書籍
 if st.button("📚 給我推薦！"):
     if user_input.strip():
         with st.spinner("正在為你尋找書籍中..."):
@@ -43,12 +47,12 @@ if st.button("📚 給我推薦！"):
                 with st.container():
                     st.markdown(f"### {book['書名']}")
                     st.markdown(f"**作者：** {book['作者']}")
-
-                    # 顯示分類與評分（若無則略過）
-                    st.markdown(f"📚 分類： {book['分類']}")
-                    st.markdown(f"⭐ 評分：尚無評分")
-
-                    # 顯示內容摘要
+                    
+                    # 分類與星級評分
+                    st.markdown(f"📚 分類： {book['📖分類']}")
+                    st.markdown(f"⭐ 評分：{book['⭐評分']}")
+                    
+                    # 大綱與完整內容
                     if pd.notna(book["內容"]) and len(book["內容"]) > 30:
                         with st.expander("📖 精選重點："):
                             outline = generate_outline(book["內容"])
