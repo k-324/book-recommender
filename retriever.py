@@ -30,6 +30,7 @@ class get_similar_books:
                 self.df = pickle.load(f)
         else:
             self.df = pd.read_csv(self.csv_path)
+            self.df["簡介"] = self.df["內容"].str.extract(r"(.*?)\s")[0].fillna("無資料")
             self.df = self.df.dropna(subset=["內容"])
             with open(self.df_path, "wb") as f:
                 pickle.dump(self.df, f)
