@@ -1,4 +1,3 @@
-# 📄 utils/summarizer.py
 import re
 import heapq
 from sklearn.feature_extraction.text import CountVectorizer
@@ -12,3 +11,4 @@ def extract_summary(text, n=3):
     scores = np.sum(vectors, axis=1)
     top_n = heapq.nlargest(n, zip(scores, sentences))
     return [s for _, s in top_n]
+
