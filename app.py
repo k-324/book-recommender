@@ -1,35 +1,40 @@
+# 📄 app.py
 import streamlit as st
-from retriever import get_similar_books
 import pandas as pd
+from utils.summarizer import extract_summary
 
-st.set_page_config(page_title="Book一試", page_icon="📘", layout="centered")
+@st.cache_data
+def load_data():
+    df = pd.read_csv("haodoo_books.csv")
+    df = df[df["是否成功擷取內容"] == True].copy()
+    df.dropna(subset=["內容"], inplace=True)
+    df["條列簡介"] = df["內容"].apply(lambda x: extract_summary(x))
+    return df
 
-st.markdown("""
-    <h1 style='text-align: center; color: #4B3832;'>📘 Book一試</h1>
-    <p style='text-align: center; color: #6E6658;'>一個溫暖又極簡的書籍推薦系統，從浩瀚書海中找到你的下一本最愛。</p>
-""", unsafe_allow_html=True)
+df = load_data()
 
-st.markdown("---")
+st.set_page_config(page_title="書籍推薦系統", layout="wide")
+st.title("📚 書籍推薦系統")
 
-user_input = st.text_input("請輸入你喜歡的主題或關鍵字：", placeholder="例如：哲學、成長、愛情、科幻…")
+keyword = st.text_input("輸入你想找的書籍主題、關鍵字：")
 
-if st.button("📚 給我推薦！"):
-    if user_input.strip():
-        with st.spinner("正在為你尋找書籍中..."):
-            recommender = get_similar_books()
-            recommendations = recommender.search(user_input)
+if keyword:
+    result_df = df[df["內容"].str.contains(keyword, case=False)]
+else:
+    result_df = df.sample(10)
 
-        if not recommendations.empty:
-            st.success(f"找到 {len(recommendations)} 本好書：")
-            for _, book in recommendations.iterrows():
-                with st.container():
-                    st.markdown(f"### {book['書名']}")
-                    st.markdown(f"**作者：** {book['作者']}")
-                    st.markdown(f"📚 分類：{book['📖分類']}")
-                    st.markdown(f"⭐ 評分：{book['⭐評分']}")
-                    st.markdown(f"📖 精選內容：{book['📚大綱']}")
-                    st.markdown("---")
-        else:
-            st.warning("目前找不到符合的書籍，請換個關鍵字試試看！")
-    else:
-        st.info("請先輸入一些想看的主題或關鍵字喔！")
+st.write(f"共找到 {len(result_df)} 本書：")
+
+for i, row in result_df.iterrows():
+    st.markdown("---")
+    cols = st.columns([2, 1])
+    with cols[0]:
+        st.subheader(f"📘《{row['書名']}》")
+        st.markdown(f"✍️ 作者：{row['作者']}  ")
+        st.markdown(f"🏷️ 分類：{row['分類']}")
+        st.markdown(f"⭐ 評分：4.3 （模擬數值）")
+        st.markdown("📌 **重點簡介：**")
+        for point in row["條列簡介"]:
+            st.markdown(f"- {point}")
+    with cols[1]:
+        st.link_button("查看完整內容 ➡️", f"/BookDetails?book={row['書名']}")
